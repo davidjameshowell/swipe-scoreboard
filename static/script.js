@@ -1,6 +1,6 @@
 function validateNewRoundForm() {
     const scoreInputs = document.querySelectorAll('input[name="scores[]"]');
-    const playerCount = scoreInputs.length;
+    const playerCount = document.querySelectorAll('input[name="scores[]"]').length;
 
     if (playerCount === 0) {
         alert('Please add players before submitting a new round.');
@@ -14,6 +14,7 @@ function validateNewRoundForm() {
 
     return validateScores(scoreInputs);
 }
+
 
 function validateScores(scoreInputs) {
     let zeroCount = 0;
