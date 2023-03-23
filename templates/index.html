@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipe Scorecard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+  </head>
+  <body>
+    <div class="container my-5">
+      <h1 class="text-center mb-4">Swipe Scorecard</h1> {% with messages = get_flashed_messages() %} {% if messages %} <ul class="list-unstyled"> {% for message in messages %} <li class="alert alert-info">{{ message }}</li> {% endfor %} </ul> {% endif %} {% endwith %} <h2>Players</h2>
+      <form action="{{ url_for('add_player') }}" method="post" class="mb-4">
+        <div class="input-group mb-3">
+          <input type="text" name="player_name" placeholder="Enter player name" class="form-control">
+          <button type="submit" class="btn btn-primary">Add Player</button>
+        </div>
+      </form>
+      <h3>Current dealer: {{ game_data.players[game_data.dealer] if game_data.dealer is not none else 'N/A' }}</h3>
+      <h2>Scores</h2>
+      <div class="table-responsive mb-4">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Player</th> {% for player in game_data.players %} <th>{{ player }}</th> {% endfor %}
+            </tr>
+          </thead>
+          <tbody> {% set max_rounds = game_data.rounds|map('count')|list|length %} {% if max_rounds > 0 %} {% set max_rounds = game_data.rounds|map('count')|max %} {% endif %} {% for round in range(max_rounds) %} <tr>
+              <td>Round {{ round + 1 }}</td> {% for player in game_data.players %} {% set round_scores = game_data.rounds[loop.index0] %} <td>{{ round_scores[round] if round < round_scores|length else '' }}
+              </td> {% endfor %}
+            </tr> {% endfor %} </tbody>
+        </table>
+      </div>
+      <h2>Add New Round</h2>
+      <form action="{{ url_for('new_round') }}" method="post" onsubmit="return validateNewRoundForm()" class="mb-4">
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody> {% for player in game_data.players %} <tr>
+                <td>{{ player }}</td>
+                <td>
+                  <input type="number" name="scores[]" min="0" value="0" class="form-control">
+                </td>
+              </tr> {% endfor %} </tbody>
+          </table>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Round</button>
+      </form>
+      <h2>Current Standings</h2>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody> {% for player, round_scores in game_data.players|zip(game_data.rounds) %} <tr>
+              <td>{{ player }}</td>
+              <td>{{ round_scores|sum }}</td>
+            </tr> {% endfor %} </tbody>
+        </table>
+      </div>
+      <form action="{{ url_for('new_game') }}" method="post">
+        <button type="submit" class="btn btn-primary">Start New Game</button>
+      </form>
+    </div>
+  </body>
+</html>
